@@ -1,7 +1,7 @@
 import * as ChatroomDOM from "./ChatroomDOM.js"
 
 const SERVER_URL: string = "ws://localhost:8300/";
-const REFRESH_TIMEOUT = 10 * 1000;
+const REFRESH_TIMEOUT: number = 30 * 1000; // 30s, half of Cowboy timeout
 
 export class ChatroomConnection {
 
@@ -21,7 +21,7 @@ export class ChatroomConnection {
 	}
 
 	connect() {
-		// Setup websocket connection
+		// Setup websocket connection with the chatroom server
 		this.websocket = new WebSocket(SERVER_URL);
 		this.websocket.addEventListener("open", () => this.onOpen());
 		this.websocket.addEventListener("close", () => this.onClose());
@@ -34,13 +34,15 @@ export class ChatroomConnection {
 		// The websocket is closed and the onclose method is invoked
 		this.websocket.close();
 	}
-	
-	
+
+
+
 	onOpen() {
-		// creation json object
-		this.login()
+		console.info("WebSocket connection opened");
+		// Send login message
+		this.login();
 		// Start of the timer for the websocket connection refresh
-		// this.keepAlive();
+		// this.keepAlive(); // TODO implement ping Erlang-side
 	}
 
 	onClose() {
@@ -53,11 +55,12 @@ export class ChatroomConnection {
 
 	onMessage(event: MessageEvent) {
 		const message = JSON.parse(event.data);
+		// Check if it's a chatroom message or the list of online users
 		switch (message.opcode) {
 			case "MESSAGE":
 				ChatroomDOM.appendMessageToChat(message.sender, message.text, false)
 				break;
-			case "ONLINE_USERS":
+			case "ONLINE_USERS": // TODO Erlang-side
 				ChatroomDOM.updateOnlineStudentsList(message.list)
 				break;
 			default:
@@ -66,28 +69,31 @@ export class ChatroomConnection {
 	}
 
 	onError() {
+		console.error("Websocket error");
+
 		if (this.websocket.readyState === 3) {
 			// Connection is closed
 			alert("Error: cannot connect to chatroom server");
 		}
-		console.error("Websocket error");
 	}
 
 
 	/**
-	 * Periodically keep alive the websocket connection every 10 sec
+	 * Periodically keep alive the websocket connection
 	 */
 	keepAlive() {
 		// If WebSocket connection is up, send a ping
 		if (this.websocket.readyState === this.websocket.OPEN) {
-			// send the refresh message
 			this.ping();
+			// Start a new timeout
 			this.keepAliveTimer = window.setTimeout(this.keepAlive, REFRESH_TIMEOUT);
 		}
 	}
 
 
-	////////////////////////////////
+	///////////////////////////////////////////////////
+	//           CLIENT-to-SERVER MESSAGES           //
+	///////////////////////////////////////////////////
 
 	login() {
 		let loginJson = {
@@ -99,12 +105,12 @@ export class ChatroomConnection {
 	}
 
 	ping() {
-		this.websocket.send("__ping__")
+		this.websocket.send("__ping__");
 	}
 
 	sendChatroomMessage() {
+		// Check if connection is closed
 		if (this.websocket.readyState === 3) {
-			// Connection closed
 			alert("Error: the chatroom is offline. Please wait for reconnection");
 			return;
 		}

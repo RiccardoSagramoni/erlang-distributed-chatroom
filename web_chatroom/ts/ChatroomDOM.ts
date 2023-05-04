@@ -1,12 +1,12 @@
 /**
- * function that append a message to the div of the chat
+ * Function that append a message to the div of the chat
  * @param senderName is the name of the sender, if the sender is the user it is
  *                      substituted by the YOU word
  * @param message is the text of the message
  * @param isMyMessage is a boolean, in order to understand if the sender is the user
  *                    or another student
  */
-export function appendMessageToChat(senderName: string, message: string, isMyMessage: boolean){
+export function appendMessageToChat(senderName: string, message: string, isMyMessage: boolean) {
 
     const chatContainer = document.getElementById("chatroom-chat");
     if (chatContainer == null) {
@@ -33,10 +33,10 @@ export function appendMessageToChat(senderName: string, message: string, isMyMes
     divMessageContent.setAttribute("class", "message-content");
     divMessageContent.textContent = message;
 
-    if(isMyMessage){
+    if (isMyMessage) {
         divMessageContainer.setAttribute("class", "message-container sent-message");
     }
-    else{
+    else {
         divMessageContainer.setAttribute("class", "message-container received-message");
     }
 
@@ -46,7 +46,7 @@ export function appendMessageToChat(senderName: string, message: string, isMyMes
     divMessage.appendChild(divMessageHeader);
     divMessageHeader.appendChild(divMessageHeaderUsername);
     divMessage.appendChild(divMessageContent);
-    
+
     // Scroll chat to bottom
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
@@ -55,10 +55,10 @@ export function appendMessageToChat(senderName: string, message: string, isMyMes
 
 
 /**
- * this function update the list of the online students
+ * Function which updates the list of the online students
  * @param studentList is the list of the current online students
  */
-export function updateOnlineStudentsList(studentList: string[]){
+export function updateOnlineStudentsList(studentList: string[]) {
     const ulOnlineStudents = document.getElementById("online-student-list");
     if (ulOnlineStudents == null) {
         console.error("online-student-list element does not exist");
@@ -78,7 +78,3 @@ export function updateOnlineStudentsList(studentList: string[]){
         }
     });
 }
-
-
-
-

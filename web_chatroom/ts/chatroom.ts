@@ -6,5 +6,5 @@ const urlParams = new URLSearchParams(window.location.search);
 const connection = new ChatroomConnection(urlParams.get("u"), Number(urlParams.get("c")));
 
 // Prepare event handlers
-document.getElementsByTagName("body")[0].onunload = function() { connection.disconnect() };
-document.getElementById("send-button").onclick = function() { connection.sendChatroomMessage() };
+document.getElementsByTagName("body")[0].onunload = function () { connection.disconnect() };
+document.getElementById("send-button").onclick = function () { connection.sendChatroomMessage() };
