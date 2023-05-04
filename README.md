@@ -6,3 +6,6 @@ The aim of this project is to improve the chatroom feature of the original appli
 
 - Rewrite the procedural code in Javascript to a **object-oriented** code in **Typescript**
 - Implement a fully distributed appraoch for Erlang nodes by removing the Mnesia database and adopting a multicast pattern for the communication between nodes. This should improve responsiveness and reliability against faults for updating the list of currently online users.
+
+## Authors
+- [Riccardo Sagramoni](https://github.com/RiccardoSagramoni)
