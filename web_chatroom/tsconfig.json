@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"module": "ES2015",
+		"noImplicitAny": false,
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"outDir": "js",
+		"sourceMap": true,
+		"target": "ES2015"
+	},
+	"include": [
+		"ts/*"
+	]
+}
