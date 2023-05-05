@@ -10,19 +10,24 @@ init(Req, _State) ->
 	{cowboy_websocket, Req, none}.
 
 
+
 % Cowboy will call websocket_handle/2 whenever a text, binary, ping or pong frame arrives from the client.
+websocket_handle({text, <<"__ping__">>}, State) ->
+	% Keep-alive ping-pong
+	io:format("[chatroom_websocket] websocket_handle => ping"),
+	{[{text, <<"__pong__">>}], State};
+
 websocket_handle(Frame = {text, Message}, State) ->
 	io:format("[chatroom_websocket] websocket_handle => Frame: ~p, State: ~p~n", [Frame, State]),
-	io:format("[chatroom_websocket] websocket_handle => Received ~p~n", [Frame]),
 	
 	DecodedMessage = jsone:try_decode(Message),
-
+	
 	Response = case element(1, DecodedMessage) of
 		ok ->
 			Json = element(2, DecodedMessage),
 			handle_websocket_frame(Json, State);
 		error ->
-			io:format("[chatroom_websocket] websocket_handle => jsone:try_decode: error: ~p~n",[element(2, DecodedMessage)]),
+			io:format("[chatroom_websocket] websocket_handle => jsone:try_decode error: ~p~n",[element(2, DecodedMessage)]),
 			{ok, State}
 	end,
 	Response;
@@ -65,13 +70,7 @@ handle_login(Map, _State) ->
 % Handle a request for updating online users
 handle_get_online_users(State = {Course, _}) ->
 	io:format("[chatroom_websocket] handle_get_online_users => get_online_users request received~n"),
-	Users = chatroom_server:get_online_students(Course),
-	Message = jsone:encode(
-		#{
-			<<"opcode">> => <<"GET_ONLINE_USERS">>,
-			<<"list">> => Users
-		}
-	),
+	Message = chatroom_server:get_online_students(Course),
 	io:format("[chatroom_websocket] handle_get_online_users => Message ~p~n", [Message]),
 	{[{text, Message}], State}.
 
@@ -79,12 +78,9 @@ handle_get_online_users(State = {Course, _}) ->
 
 % Handle a new message sent in the chatroom
 handle_chat_message(Map, State = {Course, Username}) ->
-	io:format("[chatroom_websocket] handle_chat_message => message received from Pid: ~p in the course: ~p ~n", [self(), Course]),
+	io:format("[chatroom_websocket] handle_chat_message => message received from Pid ~p in the course ~p ~n", [self(), Course]),
 	{ok, Text} = maps:find(<<"text">>, Map),
-	chatroom_server:send_message(self(),
-								binary_to_list(Username), 
-								Course, 
-								binary_to_list(Text)),
+	chatroom_server:send_message(self(), binary_to_list(Username), Course, binary_to_list(Text)),
 	{ok, State}.
 
 

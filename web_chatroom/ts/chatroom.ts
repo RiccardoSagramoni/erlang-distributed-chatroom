@@ -1,10 +1,26 @@
 import { ChatroomConnection } from "./ChatroomConnection.js";
 
-const urlParams = new URLSearchParams(window.location.search);
+function start () {
+	// Get username and course id from the GET params of url (only for demo purposes!)
+	const urlParams = new URLSearchParams(window.location.search);
 
-// Open connection
-const connection = new ChatroomConnection(urlParams.get("u"), Number(urlParams.get("c")));
+	if (urlParams.get("u") == null) {
+		alert("Username not specified");
+		return;
+	}
+	if (urlParams.get("c") == null) {
+		alert("Course not specified");
+		return;
+	}
+	const username: string = urlParams.get("u");
+	const course: number = Number(urlParams.get("c"))
 
-// Prepare event handlers
-document.getElementsByTagName("body")[0].onunload = function () { connection.disconnect() };
-document.getElementById("send-button").onclick = function () { connection.sendChatroomMessage() };
+	// Open connection
+	const connection = new ChatroomConnection(username, course);
+
+	// Prepare event handlers
+	document.getElementsByTagName("body")[0].onunload = () => connection.disconnect();
+	document.getElementById("send-button").onclick = () => connection.sendChatroomMessage();
+}
+
+start();

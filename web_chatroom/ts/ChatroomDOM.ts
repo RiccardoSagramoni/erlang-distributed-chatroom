@@ -69,7 +69,7 @@ export function updateOnlineStudentsList(studentList: string[]) {
     // Remove duplicates from new list
 
     let student_list = [...new Set(studentList)];
-    // add of the user to the html list of the online user
+    // Add of the user to the html list of the online user
     student_list.forEach(student => {
         const li = document.createElement("li");
         if (li != null) {

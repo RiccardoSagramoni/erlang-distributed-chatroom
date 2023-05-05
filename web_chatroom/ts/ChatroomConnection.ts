@@ -6,12 +6,12 @@ const REFRESH_TIMEOUT: number = 30 * 1000; // 30s, half of Cowboy timeout
 export class ChatroomConnection {
 
 	// User data
-	username: string;
-	course: number;
+	private username: string;
+	private course: number;
 
 	// WebSocket connection
-	websocket: WebSocket;
-	keepAliveTimer: number;
+	private websocket: WebSocket;
+	private keepAliveTimer: number;
 
 
 	constructor(username: string, course: number) {
@@ -37,23 +37,23 @@ export class ChatroomConnection {
 
 
 
-	onOpen() {
+	private onOpen() {
 		console.info("WebSocket connection opened");
 		// Send login message
 		this.login();
 		// Start of the timer for the websocket connection refresh
-		// this.keepAlive(); // TODO implement ping Erlang-side
+		this.keepAliveTimer = window.setInterval(this.keepAlive, REFRESH_TIMEOUT);
 	}
 
-	onClose() {
+	private onClose() {
 		console.error("WebSocket connection closed");
 		// Clear keep alive timer
-		window.clearTimeout(this.keepAliveTimer);
-		// Try to connect again to chatroom servers
+		window.clearInterval(this.keepAliveTimer);
+		// Try to connect again to chatroom servers after 1 second
 		window.setTimeout(() => this.connect(), 1000);
 	}
 
-	onMessage(event: MessageEvent) {
+	private onMessage(event: MessageEvent) {
 		const message = JSON.parse(event.data);
 		// Check if it's a chatroom message or the list of online users
 		switch (message.opcode) {
@@ -68,7 +68,7 @@ export class ChatroomConnection {
 		}
 	}
 
-	onError() {
+	private onError() {
 		console.error("Websocket error");
 
 		if (this.websocket.readyState === 3) {
@@ -81,12 +81,10 @@ export class ChatroomConnection {
 	/**
 	 * Periodically keep alive the websocket connection
 	 */
-	keepAlive() {
+	private keepAlive() {
 		// If WebSocket connection is up, send a ping
 		if (this.websocket.readyState === this.websocket.OPEN) {
 			this.ping();
-			// Start a new timeout
-			this.keepAliveTimer = window.setTimeout(this.keepAlive, REFRESH_TIMEOUT);
 		}
 	}
 
@@ -95,7 +93,7 @@ export class ChatroomConnection {
 	//           CLIENT-to-SERVER MESSAGES           //
 	///////////////////////////////////////////////////
 
-	login() {
+	private login() {
 		let loginJson = {
 			"opcode": "LOGIN",
 			"username": this.username,
@@ -104,7 +102,7 @@ export class ChatroomConnection {
 		this.websocket.send(JSON.stringify(loginJson));
 	}
 
-	ping() {
+	private ping() {
 		this.websocket.send("__ping__");
 	}
 
